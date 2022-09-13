@@ -9,7 +9,7 @@ public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idRelatorio;
-    private String empresaContratante;
+    private String empresaContratada;
     private String dataRelatorio;
     private String bandeira;
     private String gestorResponsavel;
@@ -23,8 +23,11 @@ public class Report {
     @JoinColumn(name = "fkPredio", referencedColumnName = "idPredio")
     private Building building;
 
-    public Report(String empresaContratante, String dataRelatorio, String bandeira, String gestorResponsavel, String empresa, String cnpj, Double totalKwm, Double totalReais, String nomeArquivo, Building building) {
-        this.empresaContratante = empresaContratante;
+    public Report() {
+    }
+
+    public Report(String empresaContratada, String dataRelatorio, String bandeira, String gestorResponsavel, String empresa, String cnpj, Double totalKwm, Double totalReais, String nomeArquivo, Building building) {
+        this.empresaContratada = empresaContratada;
         this.dataRelatorio = dataRelatorio;
         this.bandeira = bandeira;
         this.gestorResponsavel = gestorResponsavel;
