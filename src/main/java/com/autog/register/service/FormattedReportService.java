@@ -3,6 +3,7 @@ package com.autog.register.service;
 import com.autog.register.dto.request.*;
 import com.autog.register.dto.response.FormattedReport;
 import com.autog.register.dto.response.MonthlyConsumption;
+import com.autog.register.dto.response.TableConsumption;
 import com.autog.register.entity.*;
 import com.autog.register.repository.*;
 import com.sun.istack.NotNull;
@@ -428,4 +429,74 @@ public class FormattedReportService {
         }
     }
 
+
+    public ResponseEntity informacoesTabela(EquipmentRelatorio data, CompanyRepository repository,
+                                            RegisterRepository registerRepository, BuildingRepository buildingRepository,
+                                            RateValueRepository rateValueRepository) {
+
+        TableConsumption tc = null;
+        Double setTotalKwm = totalLampadaLigada(data, registerRepository, buildingRepository);
+
+        try {
+            if (!(repository.existsById(data.getIdPredio()))) {
+                Double totalKwm = 0.0;
+                Double totalReais = 0.0;
+                FormattedReport corpo1 = repository.corpoUm(data.getIdPredio());
+                RateValue rv = rateValueRepository.findByDateBetween(
+                        LocalDateTime.of(data.getAno(), data.getMes(), 01, 00, 00),
+                        calculoUltimoDiaMes(data.getMes(), data.getAno()));
+
+                List<MonthlyConsumption> listaLength = repository.corpoDois(data.getIdPredio());
+                if (!(listaLength.isEmpty())) {
+                    ListaObj<MonthlyConsumption> corpo2 = new ListaObj<>(listaLength.size());
+                    for (MonthlyConsumption mc : listaLength) {
+                        corpo2.adiciona(mc);
+                    }
+
+                    for (int i = 0; i < corpo2.getTamanho(); i++) {
+                        MonthlyConsumption mc = corpo2.getElemento(i);
+                        mc.setConsumoKwm(setTotalKwm);
+                        totalKwm += mc.getConsumoKwm();
+                        totalReais += mc.getPreco();
+                    }
+
+                    tc = new TableConsumption("AUTG", data.getMes() + "/" + data.getAno(), rv.getFlag(),
+                            corpo1.getNameManager(), corpo1.getCorporateName(), corpo1.getCnpj(),
+                            corpo1.getNameBuilding(), corpo1.getPublicPlace(), corpo1.getNumber(), corpo1.getCep(),
+                            totalKwm, totalReais);
+
+                } else {
+                    // Lista vázia
+                    return ResponseEntity.status(204).build();
+                }
+
+            } else {
+                // Id inexistente
+                return ResponseEntity.status(404).build();
+            }
+        } catch (Exception erro) {
+            System.out.println("Erro ao puxar os dados do servidor: " + erro);
+        }
+
+        return ResponseEntity.status(200).body(tc);
+    }
+
+    public ResponseEntity<List<MonthlyConsumption>> informacoesDeConsumo(EquipmentRelatorio data, CompanyRepository repository,
+                                                     RegisterRepository registerRepository, BuildingRepository buildingRepository,
+                                                     RateValueRepository rateValueRepository) {
+
+
+        List<MonthlyConsumption> lista = repository.corpoDois(data.getIdPredio());
+        Double setTotalKwm = totalLampadaLigada(data, registerRepository, buildingRepository);
+
+        if (!(lista.isEmpty())) {
+            for (MonthlyConsumption mc : lista) {
+                mc.setConsumoKwm(setTotalKwm);
+            }
+        }else {
+             // Lista vázia
+            return ResponseEntity.status(204).build();
+        }
+        return ResponseEntity.status(200).body(lista);
+    }
 }
