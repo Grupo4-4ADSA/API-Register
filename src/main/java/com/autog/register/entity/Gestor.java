@@ -40,7 +40,7 @@ public class Gestor {
         return nameManager;
     }
 
-    public void setNameManager(String name) {
+    public void setNameManager(String nameManager) {
         this.nameManager = nameManager;
     }
 
