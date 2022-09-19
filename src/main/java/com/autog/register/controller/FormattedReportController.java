@@ -51,4 +51,16 @@ public class FormattedReportController {
         return new FormattedReportService().importacaoTxt(idPredio, file, repository, buildingRepository, reportRepository);
     }
 
+    @PostMapping("/tabela")
+    public ResponseEntity tabelaConsumo(@RequestBody EquipmentRelatorio data) {
+        return new FormattedReportService().informacoesTabela(data, repository, registerRepository, buildingRepository,
+                rateValueRepository);
+    }
+
+    @PostMapping("/listaconsumo")
+    public ResponseEntity listaConsumoSala(@RequestBody EquipmentRelatorio data) {
+        return new FormattedReportService().informacoesDeConsumo(data, repository, registerRepository, buildingRepository,
+                rateValueRepository);
+    }
+
 }
